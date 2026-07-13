@@ -186,6 +186,36 @@ a { color: inherit; text-decoration: none; }
 }
 .flow-market { background: rgba(22, 163, 74, .12); color: var(--green-dark); }
 
+/* تصویر SVG تجمیع‌کنندگی در هیرو */
+.flow-svg { width: 100%; height: auto; display: block; }
+.flow-t-light {
+  font-family: 'Vazirmatn', system-ui, sans-serif;
+  font-weight: 800;
+  font-size: 17px;
+  fill: #fff;
+}
+.flow-t-sm { font-size: 12.5px; font-weight: 700; opacity: .95; }
+
+/* حرکت جریان روی خطوط چین‌دار (از نیروگاه‌ها به شبکه و بازار) */
+.flow-links path, .flow-link-main {
+  stroke-dashoffset: 0;
+  animation: flowDash 1.1s linear infinite;
+}
+@keyframes flowDash {
+  to { stroke-dashoffset: -26; }
+}
+
+/* تپش ملایم نیروگاه‌ها و نمای زنده */
+.solar-plant { transform-origin: center; animation: plantGlow 3.2s ease-in-out infinite; }
+@keyframes plantGlow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .82; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flow-links path, .flow-link-main, .solar-plant { animation: none; }
+}
+
 /* سکشن عمومی */
 .section { padding: 68px 0; }
 .section-alt { background: var(--bg-alt); }
