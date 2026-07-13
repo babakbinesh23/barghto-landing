@@ -174,3 +174,58 @@ if (statNumbers.length && 'IntersectionObserver' in window) {
 } else {
   statNumbers.forEach(animateCounter);
 }
+
+// ------- افکت‌های اسکرول (Scroll Reveal + Progress + Parallax) -------
+(function () {
+  const reduceMotion = window.matchMedia &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const revealEls = document.querySelectorAll('.reveal');
+
+  // ۱) ظاهرشدن نرم عناصر هنگام ورود به دید
+  if (reduceMotion) {
+    revealEls.forEach(el => el.classList.add('in-view'));
+  } else if ('IntersectionObserver' in window) {
+    const revealObserver = new IntersectionObserver(function (entries, obs) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('in-view');
+          obs.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15, rootMargin: '0px 0px -8% 0px' });
+    revealEls.forEach(el => revealObserver.observe(el));
+  } else {
+    revealEls.forEach(el => el.classList.add('in-view'));
+  }
+
+  // ۲) نوار پیشرفت اسکرول + پارالاکس ملایم هیرو
+  const progressBar = document.getElementById('scroll-progress');
+  const heroVisual = document.querySelector('.hero-visual');
+  let ticking = false;
+
+  function onScroll() {
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+
+    if (progressBar) {
+      const pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+      progressBar.style.width = pct + '%';
+    }
+
+    if (heroVisual && !reduceMotion && scrollTop < window.innerHeight) {
+      heroVisual.style.transform = 'translateY(' + (scrollTop * 0.12) + 'px)';
+    }
+
+    ticking = false;
+  }
+
+  window.addEventListener('scroll', function () {
+    if (!ticking) {
+      window.requestAnimationFrame(onScroll);
+      ticking = true;
+    }
+  }, { passive: true });
+
+  onScroll();
+})();
