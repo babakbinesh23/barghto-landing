@@ -91,13 +91,36 @@ a { color: inherit; text-decoration: none; }
 .nav-links a { color: var(--muted); font-size: .95rem; }
 .nav-links a:hover { color: var(--orange-dark); }
 
-/* هیرو */
+/* هیرو — گرادیانت متحرک سبک Stripe */
 .hero {
-  background:
-    radial-gradient(1000px 400px at 80% -10%, rgba(255, 193, 7, .25), transparent),
-    linear-gradient(180deg, var(--bg-alt), var(--bg));
+  position: relative;
+  overflow: hidden;
   padding: 70px 0 60px;
+  background: linear-gradient(180deg, var(--bg-alt), var(--bg));
 }
+/* لایه mesh رنگی متحرک پشت محتوا */
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: -30% -10% auto -10%;
+  height: 130%;
+  z-index: 0;
+  background:
+    radial-gradient(45% 55% at 20% 20%, rgba(255, 138, 0, .45), transparent 60%),
+    radial-gradient(40% 50% at 80% 15%, rgba(255, 193, 7, .45), transparent 60%),
+    radial-gradient(45% 55% at 70% 80%, rgba(22, 163, 74, .35), transparent 60%),
+    radial-gradient(40% 50% at 25% 75%, rgba(255, 138, 0, .30), transparent 60%);
+  background-size: 200% 200%;
+  filter: blur(40px) saturate(130%);
+  animation: heroMesh 18s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+@keyframes heroMesh {
+  0%   { background-position: 0% 0%, 100% 0%, 100% 100%, 0% 100%; }
+  50%  { background-position: 50% 100%, 0% 50%, 50% 0%, 100% 50%; }
+  100% { background-position: 100% 100%, 0% 100%, 0% 0%, 100% 0%; }
+}
+.hero .container { position: relative; z-index: 1; }
 .hero-grid {
   display: grid;
   grid-template-columns: 1.1fr .9fr;
@@ -114,7 +137,20 @@ a { color: inherit; text-decoration: none; }
   font-weight: 700;
   margin-bottom: 18px;
 }
-.hero h1 { font-size: 2.5rem; margin-bottom: 18px; }
+.hero h1 {
+  font-size: 2.5rem;
+  margin-bottom: 18px;
+  background: linear-gradient(100deg, var(--ink) 0%, var(--orange-dark) 45%, var(--green-dark) 75%, var(--ink) 100%);
+  background-size: 220% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  animation: heroTextShine 8s linear infinite;
+}
+@keyframes heroTextShine {
+  to { background-position: 220% center; }
+}
 .hero-lead { font-size: 1.12rem; color: var(--muted); margin-bottom: 30px; }
 .hero-cta { display: flex; flex-wrap: wrap; gap: 14px; }
 
@@ -489,10 +525,72 @@ input.invalid, select.invalid { border-color: #dc2626; }
 /* پارالاکس ملایم برای دیاگرام هیرو */
 .hero-visual { transition: transform .2s ease-out; }
 
+/* ============================================================
+   افکت‌های hover سبک Stripe — لیفت نرم کارت‌ها
+   ============================================================ */
+.stat-card,
+.faq-item,
+.flow-diagram,
+.calc-card,
+.lead-card,
+.compare-table,
+.video-placeholder,
+.note-card {
+  transition: transform .35s cubic-bezier(.2, .7, .2, 1),
+              box-shadow .35s cubic-bezier(.2, .7, .2, 1);
+}
+.stat-card:hover,
+.flow-diagram:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 22px 45px rgba(28, 35, 49, .16);
+}
+.faq-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 30px rgba(28, 35, 49, .12);
+}
+.calc-card:hover,
+.lead-card:hover,
+.compare-table:hover,
+.note-card:hover {
+  box-shadow: 0 26px 50px rgba(28, 35, 49, .15);
+}
+.video-placeholder:hover {
+  transform: translateY(-6px) scale(1.01);
+  box-shadow: 0 30px 60px rgba(28, 35, 49, .28);
+}
+
+/* درخشش نوار بالای کارت آمار هنگام hover */
+.stat-card {
+  position: relative;
+  overflow: hidden;
+}
+.stat-card::after {
+  content: "";
+  position: absolute;
+  top: 0; right: 0; left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--orange), var(--yellow), var(--green));
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform .4s cubic-bezier(.2, .7, .2, 1);
+}
+.stat-card:hover::after { transform: scaleX(1); }
+
+/* لیفت دکمه اصلی سبک Stripe */
+.btn-primary {
+  transition: transform .25s cubic-bezier(.2, .7, .2, 1),
+              box-shadow .25s cubic-bezier(.2, .7, .2, 1);
+}
+.btn-primary:hover { transform: translateY(-2px); }
+
 /* احترام به کاربرانی که انیمیشن کمتر می‌خواهند */
 @media (prefers-reduced-motion: reduce) {
   .reveal, .reveal-stagger > *, .hero-visual { transition: none; }
   .reveal, .reveal-stagger > * { opacity: 1; transform: none; }
   .scroll-progress { display: none; }
   html { scroll-behavior: auto; }
+  .hero::before { animation: none; }
+  .hero h1 { animation: none; }
+  .stat-card:hover, .flow-diagram:hover, .faq-item:hover,
+  .video-placeholder:hover, .btn-primary:hover { transform: none; }
 }
