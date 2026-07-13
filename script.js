@@ -229,3 +229,116 @@ if (statNumbers.length && 'IntersectionObserver' in window) {
 
   onScroll();
 })();
+
+// ------- Radial Burst — انفجار شعاعی متحرک پشت هیرو -------
+(function () {
+  const canvas = document.getElementById('burst-canvas');
+  if (!canvas) return;
+
+  const reduceMotion = window.matchMedia &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const ctx = canvas.getContext('2d');
+  let dpr = Math.min(window.devicePixelRatio || 1, 2);
+  let W = 0, H = 0;
+  let origin = { x: 0, y: 0 };
+  let rays = [];
+
+  // پالت خورشیدی برقتو
+  const COLORS = [
+    [255, 138, 0],   // نارنجی
+    [255, 193, 7],   // زرد
+    [22, 163, 74]    // سبز
+  ];
+
+  function lerpColor(c, t) {
+    // t=0 پایه رنگ، t=1 روشن‌تر
+    const r = Math.round(c[0] + (255 - c[0]) * t);
+    const g = Math.round(c[1] + (255 - c[1]) * t);
+    const b = Math.round(c[2] + (255 - c[2]) * t);
+    return 'rgb(' + r + ',' + g + ',' + b + ')';
+  }
+
+  function resize() {
+    W = canvas.clientWidth;
+    H = canvas.clientHeight;
+    canvas.width = Math.round(W * dpr);
+    canvas.height = Math.round(H * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    // مبدأ: پایین-وسط بوم (مثل تصویر مرجع، شعاع‌ها به سمت بالا باز می‌شوند)
+    origin = { x: W / 2, y: H * 1.02 };
+    buildRays();
+  }
+
+  function buildRays() {
+    rays = [];
+    const count = Math.max(60, Math.min(180, Math.round(W / 8)));
+    const maxLen = Math.hypot(W / 2, H) * 1.05;
+    for (let i = 0; i < count; i++) {
+      // زاویه در نیم‌دایره بالایی: از -180 تا 0 درجه
+      const angle = Math.PI + (i / (count - 1)) * Math.PI +
+        (Math.random() - 0.5) * 0.02;
+      const color = COLORS[Math.floor(Math.random() * COLORS.length)];
+      rays.push({
+        angle: angle,
+        length: maxLen * (0.45 + Math.random() * 0.55),
+        width: 0.6 + Math.random() * 1.6,
+        color: color,
+        // پارامترهای انیمیشن
+        phase: Math.random() * Math.PI * 2,
+        speed: 0.4 + Math.random() * 0.8,
+        grow: 0.6 + Math.random() * 0.4
+      });
+    }
+  }
+
+  function draw(now) {
+    ctx.clearRect(0, 0, W, H);
+    const t = now * 0.001;
+
+    for (let i = 0; i < rays.length; i++) {
+      const ray = rays[i];
+      // ضربان طول: خطوط نرم بلند و کوتاه می‌شوند
+      const pulse = 0.75 + 0.25 * Math.sin(t * ray.speed + ray.phase);
+      const len = ray.length * ray.grow * pulse;
+      const ex = origin.x + Math.cos(ray.angle) * len;
+      const ey = origin.y + Math.sin(ray.angle) * len;
+
+      // گرادیانت روشنایی در طول خط
+      const grad = ctx.createLinearGradient(origin.x, origin.y, ex, ey);
+      grad.addColorStop(0, lerpColor(ray.color, 0.15));
+      grad.addColorStop(1, lerpColor(ray.color, 0.65));
+
+      ctx.beginPath();
+      ctx.moveTo(origin.x, origin.y);
+      ctx.lineTo(ex, ey);
+      ctx.strokeStyle = grad;
+      ctx.lineWidth = ray.width;
+      ctx.globalAlpha = 0.55 * pulse;
+      ctx.stroke();
+
+      // نقطه سر خط
+      ctx.beginPath();
+      ctx.arc(ex, ey, ray.width * 1.4, 0, Math.PI * 2);
+      ctx.fillStyle = lerpColor(ray.color, 0.4);
+      ctx.globalAlpha = 0.8 * pulse;
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+
+    if (!reduceMotion) requestAnimationFrame(draw);
+  }
+
+  window.addEventListener('resize', function () {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    resize();
+    if (reduceMotion) draw(0);
+  });
+
+  resize();
+  if (reduceMotion) {
+    draw(0); // یک فریم ثابت
+  } else {
+    requestAnimationFrame(draw);
+  }
+})();
