@@ -53,10 +53,25 @@ if (calcForm) {
     const barghtoIncome = guaranteedIncome * CONFIG.BARGHTO_UPLIFT;
     const diff = barghtoIncome - guaranteedIncome;
 
-    document.getElementById('r-production').textContent = formatNumber(annualProduction);
+    // شمارش انیمیشنی عدد تولید سالانه
+    const rProduction = document.getElementById('r-production');
+    rProduction.dataset.target = Math.round(annualProduction);
+    rProduction.dataset.suffix = '';
+    animateCounter(rProduction);
+
     document.getElementById('r-guaranteed').textContent = formatToman(guaranteedIncome);
     document.getElementById('r-barghto').textContent = formatToman(barghtoIncome);
     document.getElementById('r-diff').textContent = '+ ' + formatToman(diff);
+
+    // افکت ورودی نتایج: ری‌ست و اجرای مجدد انیمیشن pop
+    const resultRows = document.querySelectorAll('#calc-results .result-row');
+    resultRows.forEach(function (row, i) {
+      row.classList.remove('result-pop');
+      // اجبار به reflow تا انیمیشن از ابتدا اجرا شود
+      void row.offsetWidth;
+      row.style.animationDelay = (i * 0.08) + 's';
+      row.classList.add('result-pop');
+    });
   });
 }
 

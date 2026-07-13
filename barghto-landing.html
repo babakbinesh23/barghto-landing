@@ -230,7 +230,28 @@ a { color: inherit; text-decoration: none; }
 .section { padding: 68px 0; }
 .section-alt { background: var(--bg-alt); }
 .section-head { text-align: center; max-width: 720px; margin: 0 auto 40px; }
-.section-head h2 { font-size: 2rem; margin-bottom: 12px; }
+.section-head h2 {
+  font-size: 2rem;
+  margin-bottom: 12px;
+  position: relative;
+  display: inline-block;
+  padding-bottom: 10px;
+}
+/* زیرخط انیمیشنی عنوان‌های سکشن: هنگام ورود به دید باز می‌شود */
+.section-head h2::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  right: 50%;
+  transform: translateX(50%) scaleX(0);
+  transform-origin: center;
+  width: 64px;
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--orange), var(--yellow), var(--green));
+  transition: transform .6s cubic-bezier(.2, .7, .2, 1) .15s;
+}
+.section-head.in-view h2::after { transform: translateX(50%) scaleX(1); }
 .section-head p { color: var(--muted); font-size: 1.05rem; }
 
 /* آیین‌نامه */
@@ -303,6 +324,16 @@ a { color: inherit; text-decoration: none; }
 .result-row.highlight .result-value { color: var(--yellow); }
 .result-row.diff { background: rgba(22, 163, 74, .2); }
 .result-row.diff .result-value { color: #7ee29b; font-size: 1.2rem; }
+
+/* انیمیشن ورودی نتایج ماشین‌حساب */
+.result-row.result-pop {
+  animation: resultPop .5s cubic-bezier(.2, .7, .2, 1) both;
+}
+@keyframes resultPop {
+  0%   { opacity: 0; transform: translateY(14px) scale(.96); }
+  60%  { opacity: 1; transform: translateY(-2px) scale(1.02); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
 
 /* فیلدها */
 .field { display: flex; flex-direction: column; gap: 7px; }
@@ -549,18 +580,24 @@ input.invalid, select.invalid { border-color: #dc2626; }
 .reveal-stagger > * {
   opacity: 0;
   transform: translateY(30px);
-  transition: opacity .6s ease, transform .6s ease;
+  transition: opacity .6s cubic-bezier(.2, .7, .2, 1),
+              transform .6s cubic-bezier(.2, .7, .2, 1);
 }
+/* جهت‌های متنوع ورود برای اعضای گروه (اولویت بالاتر از حالت پیش‌فرض) */
+.reveal-stagger > *.reveal-right { transform: translateX(44px); }
+.reveal-stagger > *.reveal-left  { transform: translateX(-44px); }
+.reveal-stagger > *.reveal-zoom  { transform: scale(.88); }
 .reveal-stagger.in-view > * {
   opacity: 1;
   transform: none;
 }
-.reveal-stagger.in-view > *:nth-child(1) { transition-delay: .05s; }
-.reveal-stagger.in-view > *:nth-child(2) { transition-delay: .15s; }
-.reveal-stagger.in-view > *:nth-child(3) { transition-delay: .25s; }
-.reveal-stagger.in-view > *:nth-child(4) { transition-delay: .35s; }
-.reveal-stagger.in-view > *:nth-child(5) { transition-delay: .45s; }
-.reveal-stagger.in-view > *:nth-child(6) { transition-delay: .55s; }
+/* تأخیر پلکانی ۸۰ms مبتنی بر nth-child تا فرزند ۶ام */
+.reveal-stagger.in-view > *:nth-child(1) { transition-delay: 0s; }
+.reveal-stagger.in-view > *:nth-child(2) { transition-delay: .08s; }
+.reveal-stagger.in-view > *:nth-child(3) { transition-delay: .16s; }
+.reveal-stagger.in-view > *:nth-child(4) { transition-delay: .24s; }
+.reveal-stagger.in-view > *:nth-child(5) { transition-delay: .32s; }
+.reveal-stagger.in-view > *:nth-child(6) { transition-delay: .40s; }
 
 /* نوار پیشرفت اسکرول بالای صفحه */
 .scroll-progress {
@@ -590,14 +627,23 @@ input.invalid, select.invalid { border-color: #dc2626; }
   transition: transform .35s cubic-bezier(.2, .7, .2, 1),
               box-shadow .35s cubic-bezier(.2, .7, .2, 1);
 }
-.stat-card:hover,
+.stat-card,
+.flow-diagram,
+.faq-item {
+  transition: transform .25s cubic-bezier(.2, .7, .2, 1),
+              box-shadow .25s cubic-bezier(.2, .7, .2, 1);
+}
+.stat-card:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 22px 45px rgba(255, 138, 0, .22);
+}
 .flow-diagram:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 22px 45px rgba(28, 35, 49, .16);
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 22px 45px rgba(22, 163, 74, .2);
 }
 .faq-item:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 14px 30px rgba(28, 35, 49, .12);
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: 0 16px 32px rgba(255, 138, 0, .16);
 }
 .calc-card:hover,
 .lead-card:hover,
@@ -634,6 +680,30 @@ input.invalid, select.invalid { border-color: #dc2626; }
 }
 .btn-primary:hover { transform: translateY(-2px); }
 
+/* ضربان درخشش ملایم روی دکمه‌های اصلی CTA (هیرو و پایان صفحه) */
+.hero-cta .btn-primary,
+.faq-cta .btn-primary {
+  animation: pulseGlow 2.6s ease-in-out infinite;
+}
+.hero-cta .btn-primary:hover,
+.faq-cta .btn-primary:hover { animation-play-state: paused; }
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 8px 20px rgba(255, 138, 0, .35); }
+  50%      { box-shadow: 0 10px 30px rgba(255, 138, 0, .6),
+                         0 0 0 6px rgba(255, 138, 0, .1); }
+}
+
+/* شناوری ملایم آیکون‌ها */
+.play-btn,
+.brand-mark {
+  animation: float 6s ease-in-out infinite;
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
+}
+.video-placeholder:hover .play-btn { animation: none; }
+
 /* احترام به کاربرانی که انیمیشن کمتر می‌خواهند */
 @media (prefers-reduced-motion: reduce) {
   .reveal, .reveal-stagger > *, .hero-visual { transition: none; }
@@ -644,6 +714,12 @@ input.invalid, select.invalid { border-color: #dc2626; }
   .hero h1 { animation: none; }
   .stat-card:hover, .flow-diagram:hover, .faq-item:hover,
   .video-placeholder:hover, .btn-primary:hover { transform: none; }
+  /* غیرفعال‌سازی انیمیشن‌های جدید */
+  .hero-cta .btn-primary, .faq-cta .btn-primary,
+  .play-btn, .brand-mark,
+  .result-row.result-pop { animation: none; }
+  .result-row.result-pop { opacity: 1; transform: none; }
+  .section-head h2::after { transition: none; transform: translateX(50%) scaleX(1); }
 }
 
 </style>
@@ -1005,22 +1081,22 @@ input.invalid, select.invalid { border-color: #dc2626; }
         <h2>عملکرد برقتو</h2>
       </div>
       <div class="stats-grid reveal reveal-stagger">
-        <div class="stat-card">
+        <div class="stat-card reveal-right">
           <div class="stat-number" data-target="120" data-suffix="+">۰</div>
           <div class="stat-title">چند نیروگاه؟</div>
           <div class="stat-desc">عدد به‌روز از نیروگاه‌های تحت مدیریت</div>
         </div>
-        <div class="stat-card">
+        <div class="stat-card reveal-zoom">
           <div class="stat-number" data-target="85" data-suffix=" MW">۰</div>
           <div class="stat-title">چند مگاوات؟</div>
           <div class="stat-desc">مجموع ظرفیت برق مدیریت‌شده</div>
         </div>
-        <div class="stat-card">
+        <div class="stat-card reveal-left">
           <div class="stat-number" data-target="1500" data-suffix="+">۰</div>
           <div class="stat-title">چند معامله؟</div>
           <div class="stat-desc">تعداد معاملات انجام‌شده در بازار برق</div>
         </div>
-        <div class="stat-card">
+        <div class="stat-card reveal-zoom">
           <div class="stat-number" data-target="35" data-suffix="٪">۰</div>
           <div class="stat-title">چند درصد افزایش درآمد؟</div>
           <div class="stat-desc">میانگین افزایش درآمد نسبت به خرید تضمینی</div>
@@ -1171,10 +1247,25 @@ if (calcForm) {
     const barghtoIncome = guaranteedIncome * CONFIG.BARGHTO_UPLIFT;
     const diff = barghtoIncome - guaranteedIncome;
 
-    document.getElementById('r-production').textContent = formatNumber(annualProduction);
+    // شمارش انیمیشنی عدد تولید سالانه
+    const rProduction = document.getElementById('r-production');
+    rProduction.dataset.target = Math.round(annualProduction);
+    rProduction.dataset.suffix = '';
+    animateCounter(rProduction);
+
     document.getElementById('r-guaranteed').textContent = formatToman(guaranteedIncome);
     document.getElementById('r-barghto').textContent = formatToman(barghtoIncome);
     document.getElementById('r-diff').textContent = '+ ' + formatToman(diff);
+
+    // افکت ورودی نتایج: ری‌ست و اجرای مجدد انیمیشن pop
+    const resultRows = document.querySelectorAll('#calc-results .result-row');
+    resultRows.forEach(function (row, i) {
+      row.classList.remove('result-pop');
+      // اجبار به reflow تا انیمیشن از ابتدا اجرا شود
+      void row.offsetWidth;
+      row.style.animationDelay = (i * 0.08) + 's';
+      row.classList.add('result-pop');
+    });
   });
 }
 
